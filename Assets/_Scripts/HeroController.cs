@@ -71,23 +71,25 @@ public class HeroController : MonoBehaviour {
 		float absVelocityX = Mathf.Abs (this._rigidBody2D.velocity.x);
 		float absVelocityY = Mathf.Abs (this._rigidBody2D.velocity.y);
 
-		//gets a number between -1 to 1 for horizontal and vertical axes movement
-		this._move = Input.GetAxis ("Horizontal");
-		this._jump = Input.GetAxis ("Vertical");
-		if (this._move != 0) {
-			//call the hero_walk animation
+		if (this._isGrounded) {
+			//gets a number between -1 to 1 for horizontal and vertical axes movement
+			this._move = Input.GetAxis ("Horizontal");
+			this._jump = Input.GetAxis ("Vertical");
 
-			if(this._move > 0 ) {	//hero is facing to the right side
-				this._facingRight = true;
-				this._flip ();
-			}
+			if (this._move != 0) {
+				//call the hero_walk animation
 
-			if (this._move < 0) { //hero is facing to the left side
-				this._facingRight = false;
-				this._flip ();
-			}
+				if(this._move > 0 ) {	//hero is facing to the right side
+					this._facingRight = true;
+					this._flip ();
+				}
 
-			this._animator.SetInteger ("AnimState", 1);
+				if (this._move < 0) { //hero is facing to the left side
+					this._facingRight = false;
+					this._flip ();
+				}
+		}
+		  this._animator.SetInteger ("AnimState", 1);
 		} else {			
 			this._animator.SetInteger ("AnimState", 0);
 		}
