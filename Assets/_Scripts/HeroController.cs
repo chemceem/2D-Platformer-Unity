@@ -45,9 +45,9 @@ public class HeroController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//initialise public instance variables
-		this.velocityRange = new VelocityRange(300f, 1000f);
-		this.moveForce = 50f;
-		this.jumpForce = 500f;
+		this.velocityRange = new VelocityRange(300f, 5000f);
+		//this.moveForce = 50f;
+		//this.jumpForce = 500f;
 
 
 		//initialise private instance variables
@@ -72,32 +72,46 @@ public class HeroController : MonoBehaviour {
 		float absVelocityY = Mathf.Abs (this._rigidBody2D.velocity.y);
 
 		if (this._isGrounded) {
+
 			//gets a number between -1 to 1 for horizontal and vertical axes movement
 			this._move = Input.GetAxis ("Horizontal");
 			this._jump = Input.GetAxis ("Vertical");
 
-			if (this._move != 0) {
-				//call the hero_walk animation
+			if (this._move != 0) {			
 
-				if(this._move > 0 ) {	//hero is facing to the right side
+				if (this._move > 0) {	//hero is facing to the right side
+					if(absVelocityX < this.velocityRange.maxVelocity){
+						forceX = this.moveForce;
+					}
 					this._facingRight = true;
 					this._flip ();
 				}
 
 				if (this._move < 0) { //hero is facing to the left side
+					if(absVelocityX < this.velocityRange.maxVelocity){
+						forceX = -this.moveForce;
+					}
 					this._facingRight = false;
 					this._flip ();
 				}
-		}
-		  this._animator.SetInteger ("AnimState", 1);
-		} else {			
-			this._animator.SetInteger ("AnimState", 0);
-		}
+				//call the hero_walk animation
+				this._animator.SetInteger ("AnimState", 1);
+			} else {	
+				this._animator.SetInteger ("AnimState", 0);
+			}
 
-		if (this._jump > 0) {
+			if (this._jump > 0) {
+				if(absVelocityY < this.velocityRange.maxVelocity){
+					forceY = this.jumpForce;
+				}
+			}
+		} else {
 			//call the hero_jumb animation
 			this._animator.SetInteger ("AnimState", 2);
 		}
+
+		//apply the forces
+		this._rigidBody2D.AddForce (new Vector2 (forceX, forceY));
 	}
 
 	//PRIVATE METHODS
