@@ -28,7 +28,7 @@ public class VelocityRange {
 public class HeroController : MonoBehaviour {
 
 	//PRIVATE INSTANCE VARIABLES
-	private Transform _transform;
+	private Transform _transform;	//this transform variable is to reference the hero gameobject
 	private Animator _animator;
 	private Rigidbody2D _rigidBody2D;
 	private float _move;
@@ -41,14 +41,14 @@ public class HeroController : MonoBehaviour {
 	public float moveForce;
 	public float jumpForce;
 	public Transform groundCheck;
-	public Camera cameraObject;
+	public Transform cameraObject;
 
 	// Use this for initialization
 	void Start () {
 		//initialise public instance variables
-		this.velocityRange = new VelocityRange(300f, 5000f);
-		this.moveForce = 600f;
-		this.jumpForce = 21000f;
+		this.velocityRange = new VelocityRange(700f, 5000f);
+		this.moveForce = 700f;
+		this.jumpForce = 22000f;
 
 
 		//initialise private instance variables
@@ -62,7 +62,8 @@ public class HeroController : MonoBehaviour {
 
 	void FixedUpdate () {
 
-		Vector3 currentPosition = new Vector3 (this._transform.position.x, this._transform.position.y, -10f);
+		Vector3 currentPosition = new Vector3 (this._transform.position.x+150f, this._transform.position.y+0f, -1f);
+		this.cameraObject.position = currentPosition;
 
 		this._isGrounded = Physics2D.Linecast (this._transform.position, this.groundCheck.position,
 							1 << LayerMask.NameToLayer("ground"));
@@ -107,13 +108,6 @@ public class HeroController : MonoBehaviour {
 			if (this._jump > 0) {
 				if(absVelocityY < this.velocityRange.maxVelocity){
 					forceY = this.jumpForce;
-				}
-				if (this._move > 0) {	//hero is facing to the right side
-					this._facingRight = true;
-					this._flip ();
-				} else {
-					this._facingRight = false;
-					this._flip ();
 				}
 			}
 		} else {
