@@ -41,13 +41,14 @@ public class HeroController : MonoBehaviour {
 	public float moveForce;
 	public float jumpForce;
 	public Transform groundCheck;
+	public Camera cameraObject;
 
 	// Use this for initialization
 	void Start () {
 		//initialise public instance variables
 		this.velocityRange = new VelocityRange(300f, 5000f);
-		//this.moveForce = 50f;
-		//this.jumpForce = 500f;
+		this.moveForce = 600f;
+		this.jumpForce = 21000f;
 
 
 		//initialise private instance variables
@@ -58,9 +59,11 @@ public class HeroController : MonoBehaviour {
 		this._jump = 0f;
 		this._facingRight = true;
 	}
-	
-	// Update is called once per frame
+
 	void FixedUpdate () {
+
+		Vector3 currentPosition = new Vector3 (this._transform.position.x, this._transform.position.y, -10f);
+
 		this._isGrounded = Physics2D.Linecast (this._transform.position, this.groundCheck.position,
 							1 << LayerMask.NameToLayer("ground"));
 
@@ -77,17 +80,17 @@ public class HeroController : MonoBehaviour {
 			this._move = Input.GetAxis ("Horizontal");
 			this._jump = Input.GetAxis ("Vertical");
 
-			if (this._move != 0) {			
-
-				if (this._move > 0) {	//hero is facing to the right side
+			if (this._move != 0) {
+				//if the user want to turn the hero to the right direction
+				if (this._move > 0) {	
 					if(absVelocityX < this.velocityRange.maxVelocity){
 						forceX = this.moveForce;
 					}
 					this._facingRight = true;
 					this._flip ();
 				}
-
-				if (this._move < 0) { //hero is facing to the left side
+				//if the user want to turn the hero to left direction
+				if (this._move < 0) { 
 					if(absVelocityX < this.velocityRange.maxVelocity){
 						forceX = -this.moveForce;
 					}
@@ -96,13 +99,21 @@ public class HeroController : MonoBehaviour {
 				}
 				//call the hero_walk animation
 				this._animator.SetInteger ("AnimState", 1);
-			} else {	
+			}
+			else {
 				this._animator.SetInteger ("AnimState", 0);
 			}
 
 			if (this._jump > 0) {
 				if(absVelocityY < this.velocityRange.maxVelocity){
 					forceY = this.jumpForce;
+				}
+				if (this._move > 0) {	//hero is facing to the right side
+					this._facingRight = true;
+					this._flip ();
+				} else {
+					this._facingRight = false;
+					this._flip ();
 				}
 			}
 		} else {
@@ -115,6 +126,8 @@ public class HeroController : MonoBehaviour {
 	}
 
 	//PRIVATE METHODS
+
+	//method to change the direction of the hero (left or right)
 	private void _flip() {
 		if (this._facingRight) {
 			this._transform.localScale = new Vector2 (2,2);
@@ -122,6 +135,6 @@ public class HeroController : MonoBehaviour {
 		else {
 			this._transform.localScale = new Vector2 (-2,2);
 		}
+	}
 
-	}	
 }
