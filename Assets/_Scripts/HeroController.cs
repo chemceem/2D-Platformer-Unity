@@ -47,8 +47,8 @@ public class HeroController : MonoBehaviour {
 	void Start () {
 		//initialise public instance variables
 		this.velocityRange = new VelocityRange(700f, 5000f);
-		this.moveForce = 700f;
-		this.jumpForce = 22000f;
+		this.moveForce = 800f;
+		this.jumpForce = 26000f;
 
 
 		//initialise private instance variables
@@ -75,6 +75,7 @@ public class HeroController : MonoBehaviour {
 		float absVelocityX = Mathf.Abs (this._rigidBody2D.velocity.x);
 		float absVelocityY = Mathf.Abs (this._rigidBody2D.velocity.y);
 
+		//if the hero is on the ground
 		if (this._isGrounded) {
 
 			//gets a number between -1 to 1 for horizontal and vertical axes movement
@@ -110,11 +111,34 @@ public class HeroController : MonoBehaviour {
 					forceY = this.jumpForce;
 				}
 			}
+		//if the hero is not on the ground like jumping or falling down
 		} else {
+
+			//gets a number between -1 to 1 for horizontal and vertical axes movement
+			this._move = Input.GetAxis ("Horizontal");
+			this._jump = Input.GetAxis ("Vertical");
+
+			if (this._move != 0) {
+				//if the user want to turn the hero to the right direction
+				if (this._move > 0) {	
+					if(absVelocityX < this.velocityRange.maxVelocity){
+						forceX = this.moveForce*0.35f;
+					}
+					this._facingRight = true;
+					this._flip ();
+				}
+				//if the user want to turn the hero to left direction
+				if (this._move < 0) { 
+					if(absVelocityX < this.velocityRange.maxVelocity){
+						forceX = -this.moveForce*0.35f;
+					}
+					this._facingRight = false;
+					this._flip ();
+				}
+			}
 			//call the hero_jumb animation
 			this._animator.SetInteger ("AnimState", 2);
 		}
-
 		//apply the forces
 		this._rigidBody2D.AddForce (new Vector2 (forceX, forceY));
 	}
@@ -130,5 +154,4 @@ public class HeroController : MonoBehaviour {
 			this._transform.localScale = new Vector2 (-2,2);
 		}
 	}
-
 }
