@@ -47,7 +47,7 @@ public class HeroController : MonoBehaviour {
 	void Start () {
 		//initialise public instance variables
 		this.velocityRange = new VelocityRange(700f, 5000f);
-		this.moveForce = 800f;
+		this.moveForce = 800;
 		this.jumpForce = 26000f;
 
 
