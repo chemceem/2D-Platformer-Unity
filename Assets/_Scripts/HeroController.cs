@@ -42,6 +42,8 @@ public class HeroController : MonoBehaviour {
 	public float jumpForce;
 	public Transform groundCheck;
 	public Transform cameraObject;
+	public GameObject bridgeObject;
+	public GameObject[] boxObjects;
 
 	// Use this for initialization
 	void Start () {
@@ -50,7 +52,6 @@ public class HeroController : MonoBehaviour {
 		this.moveForce = 800;
 		this.jumpForce = 26000f;
 
-
 		//initialise private instance variables
 		this._transform = gameObject.GetComponent<Transform> ();
 		this._animator = gameObject.GetComponent<Animator> ();
@@ -58,6 +59,9 @@ public class HeroController : MonoBehaviour {
 		this._move = 0f;
 		this._jump = 0f;
 		this._facingRight = true;
+
+		//place the hero to the starting position
+		//this._spawn (-400, 200, 0);
 	}
 
 	void FixedUpdate () {
@@ -143,6 +147,22 @@ public class HeroController : MonoBehaviour {
 		this._rigidBody2D.AddForce (new Vector2 (forceX, forceY));
 	}
 
+	void OnCollisionEnter2D(Collision2D other) {
+		if(other.gameObject.CompareTag("death")) {
+			if (this._transform.position.x < 570f) {
+				this._spawn (-400, 200, 0);
+			} 
+			if( this._transform.position.x > 570f && this._transform.position.x < 2410f) {
+				this._spawnBridge ();
+				this._spawnBoxes ();
+				this._spawn (600, 250, 0);
+			}
+			if (this._transform.position.x > 2410f) {
+				this._spawn (2425, 250, 0);
+			}
+		}
+	}
+
 	//PRIVATE METHODS
 
 	//method to change the direction of the hero (left or right)
@@ -154,4 +174,33 @@ public class HeroController : MonoBehaviour {
 			this._transform.localScale = new Vector2 (-2,2);
 		}
 	}
+
+	private void _spawn(float x, float y, float z){
+		this._transform.position = new Vector3 (x, y, z);
+	}
+
+	//to restore the bridge back to the normal position
+	private void _spawnBridge(){
+		bridgeObject = GameObject.FindGameObjectWithTag ("bridge");	
+		bridgeObject.gameObject.SetActive (false);
+		bridgeObject.transform.position = new Vector3 (1150f, 150f, 0);
+		bridgeObject.transform.rotation = Quaternion.Euler (0,0,0);
+		Instantiate (bridgeObject, bridgeObject.transform.position, bridgeObject.transform.rotation);
+		bridgeObject.gameObject.SetActive (true);
+	}
+
+	private void _spawnBoxes(){
+		boxObjects = GameObject.FindGameObjectsWithTag ("goldenbox");
+		foreach (GameObject boxObject in boxObjects) {
+			
+
+		}
+		foreach (GameObject boxObject in boxObjects) {
+			boxObject.gameObject.SetActive (false);
+			boxObject.transform.rotation = Quaternion.Euler (0,0,0);
+			boxObject.transform.position = new Vector3 (920f, 25f, 0);
+			Instantiate (boxObject, boxObject.transform.position, boxObject.transform.rotation);
+			boxObject.gameObject.SetActive (true);
+		} 
+	} 
 }
