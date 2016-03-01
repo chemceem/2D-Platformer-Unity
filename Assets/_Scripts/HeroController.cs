@@ -5,7 +5,8 @@ using System.Collections;
  * Controller class for the Hero
  * @author : Chemcee Cherian , 300793352
  * Created on : 23-02-2016
- * Last modified : 24-02-2016 2250
+ * Last modified : 29-02-2016 
+ * Description : Class that controls the player movement and the collisions
  * */
 
 //velocity range utility class
@@ -35,6 +36,11 @@ public class HeroController : MonoBehaviour {
 	private float _jump;
 	private bool _facingRight;
 	private bool _isGrounded;
+	private AudioSource[] _audioSources;
+	private AudioSource _jumpSound;
+	private AudioSource _coinSound;
+	private AudioSource _deathSound;
+	private AudioSource _enemyDeath;
 
 	//PUBLIC INSTANCE VARIABLES
 	public VelocityRange velocityRange;
@@ -44,11 +50,12 @@ public class HeroController : MonoBehaviour {
 	public Transform cameraObject;
 	public GameObject bridgeObject;
 	public GameObject[] boxObjects;
+	public GameController gameController;
 
 	// Use this for initialization
 	void Start () {
 		//initialise public instance variables
-		this.velocityRange = new VelocityRange(700f, 5000f);
+		this.velocityRange = new VelocityRange(700f, 5000f);	
 		this.moveForce = 800;
 		this.jumpForce = 26000f;
 
@@ -60,8 +67,15 @@ public class HeroController : MonoBehaviour {
 		this._jump = 0f;
 		this._facingRight = true;
 
+		//audio sources
+		this._audioSources = gameObject.GetComponents<AudioSource>();
+		this._jumpSound = this._audioSources [0];
+		this._coinSound = this._audioSources [1];
+		this._deathSound = this._audioSources [2];
+		this._enemyDeath = this._audioSources [3];
+
 		//place the hero to the starting position
-		//this._spawn (-400, 200, 0);
+		this._spawn (-400, 200, 0);
 	}
 
 	void FixedUpdate () {
@@ -71,7 +85,7 @@ public class HeroController : MonoBehaviour {
 
 		this._isGrounded = Physics2D.Linecast (this._transform.position, this.groundCheck.position,
 							1 << LayerMask.NameToLayer("ground"));
-
+		
 		float forceX = 0f;
 		float forceY = 0f;
 
@@ -112,6 +126,7 @@ public class HeroController : MonoBehaviour {
 
 			if (this._jump > 0) {
 				if(absVelocityY < this.velocityRange.maxVelocity){
+					this._jumpSound.Play ();
 					forceY = this.jumpForce;
 				}
 			}
@@ -149,17 +164,33 @@ public class HeroController : MonoBehaviour {
 
 	void OnCollisionEnter2D(Collision2D other) {
 		if(other.gameObject.CompareTag("death")) {
-			if (this._transform.position.x < 570f) {
-				this._spawn (-400, 200, 0);
-			} 
-			if( this._transform.position.x > 570f && this._transform.position.x < 2410f) {
-				this._spawnBridge ();
-				this._spawnBoxes ();
-				this._spawn (600, 250, 0);
-			}
-			if (this._transform.position.x > 2410f) {
-				this._spawn (2425, 250, 0);
-			}
+			this.gameController.LivesValue--;
+			this._deathSound.Play ();
+			this._playerDeath ();
+		}
+
+		if (other.gameObject.CompareTag ("enemy")) {
+			this.gameController.LivesValue--;
+			this._deathSound.Play ();
+			this._playerDeath ();
+		}
+	}
+
+	void OnTriggerEnter2D(Collider2D other) {
+		if (other.gameObject.CompareTag ("coin")) {
+			this._coinSound.Play ();
+			Destroy (other.gameObject);
+			this.gameController.ScoreValue += 100;
+		}
+
+		if (other.gameObject.CompareTag ("enemy")) {
+			Destroy (other.gameObject);
+			this._enemyDeath.Play ();
+		}
+
+		//when the player reaches the final door
+		if (other.gameObject.CompareTag ("door")) {
+			gameController.finishGame ();
 		}
 	}
 
@@ -175,8 +206,23 @@ public class HeroController : MonoBehaviour {
 		}
 	}
 
-	private void _spawn(float x, float y, float z){
+	private void _spawn(float x, float y, float z){		
 		this._transform.position = new Vector3 (x, y, z);
+	}
+
+	//method that takes care of the player death (fall or enemy)
+	private void _playerDeath(){
+		if (this._transform.position.x < 570f) {
+			this._spawn (-400, 200, 0);
+		} 
+		if( this._transform.position.x > 570f && this._transform.position.x < 2410f) {
+			this._spawnBridge ();
+			this._spawnBoxes ();
+			this._spawn (600, 250, 0);
+		}
+		if (this._transform.position.x > 2410f) {
+			this._spawn (2425, 250, 0);
+		}
 	}
 
 	//to restore the bridge back to the normal position
@@ -192,13 +238,9 @@ public class HeroController : MonoBehaviour {
 	private void _spawnBoxes(){
 		boxObjects = GameObject.FindGameObjectsWithTag ("goldenbox");
 		foreach (GameObject boxObject in boxObjects) {
-			
-
-		}
-		foreach (GameObject boxObject in boxObjects) {
 			boxObject.gameObject.SetActive (false);
 			boxObject.transform.rotation = Quaternion.Euler (0,0,0);
-			boxObject.transform.position = new Vector3 (920f, 25f, 0);
+			boxObject.transform.position = new Vector3 (920f, 40f, 0);
 			Instantiate (boxObject, boxObject.transform.position, boxObject.transform.rotation);
 			boxObject.gameObject.SetActive (true);
 		} 
